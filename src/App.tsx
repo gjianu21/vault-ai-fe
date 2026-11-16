@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { fetchMe, logout } from './api/auth';
-import { AccountsPanel } from './components/AccountsPanel';
 import { ChatPanel } from './components/ChatPanel';
 import { LoginScreen } from './components/LoginScreen';
 import type { Me } from './types';
@@ -9,8 +8,6 @@ export default function App() {
   const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // incremented after a transfer, so the accounts panel reloads the balances
-  const [accountsVersion, setAccountsVersion] = useState(0);
 
   useEffect(() => {
     fetchMe()
@@ -44,8 +41,7 @@ export default function App() {
       </header>
 
       <main className="content">
-        <AccountsPanel refreshKey={accountsVersion} />
-        <ChatPanel onBalanceChanged={() => setAccountsVersion((version) => version + 1)} />
+        <ChatPanel />
       </main>
     </div>
   );

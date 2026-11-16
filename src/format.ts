@@ -1,8 +1,5 @@
-import type { Money } from './types';
-
-export function formatMoney(amount: Money, currency: string): string {
-    const value = typeof amount === 'string' ? Number(amount) : amount;
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
+export function formatMoney(amount: number, currency: string): string {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
 }
 
 export function formatDate(iso: string): string {

@@ -12,7 +12,6 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': BACKEND_URL,
-      '/graphql': BACKEND_URL,
       '/oauth2': BACKEND_URL,
       '/login/oauth2': BACKEND_URL,
     },
