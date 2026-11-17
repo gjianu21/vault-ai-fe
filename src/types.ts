@@ -4,70 +4,117 @@ export interface Me {
     roles: string[];
 }
 
-export type AccountType = 'CURRENT' | 'SAVINGS';
-export type TransactionType = 'CREDIT' | 'DEBIT';
+export type ReplySource = 'AI' | 'MOCK' | 'RULES' | 'FALLBACK';
 
-// GraphQL returns amounts as strings, REST as numbers
-export type Money = string | number;
-
-export interface Account {
+export interface Conversation {
     id: string;
-    iban: string;
+    title: string;
+    saved: boolean;
+    closed: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ChatMessageDto {
+    id: string;
+    role: 'USER' | 'ASSISTANT';
+    content: string;
+    createdAt: string;
+}
+
+// ---------- Briefing: structured data for the cards (contract with the backend) ----------
+
+export type SignalSeverity = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface BriefingCustomer {
+    id: string;
     name: string;
-    type: AccountType;
-    currency: string;
-    balance: Money;
+    age: number;
+    occupation: string;
+    city: string;
+    segment: string;
+    customerSinceYears: number;
+    riskProfile: string;
 }
 
-export interface Transaction {
+export interface BriefingMeeting {
     id: string;
-    type: TransactionType;
-    amount: Money;
-    currency: string;
-    description: string | null;
-    counterpartyName?: string | null;
-    bookedAt: string;
+    /** Already formatted by the backend: "today", "tomorrow", "in 4 days" */
+    when: string;
+    time: string;
+    topic: string;
 }
 
-export type ActionType = 'GET_BALANCE' | 'GET_TRANSACTIONS' | 'TRANSFER';
-export type ActionOutcome = 'COMPLETED' | 'PENDING_CONFIRMATION' | 'REJECTED' | 'CANCELLED' | 'EXPIRED';
-
-export interface ActionResult {
-    actionId: string | null;
-    type: ActionType | null;
-    outcome: ActionOutcome;
-    message: string;
-    data: unknown;
+export interface BriefingProduct {
+    id: string;
+    name: string;
+    /** Already formatted: "EUR 50,000", "13% used" */
+    amountLabel: string;
+    /** Short extra line: "matures in 30 days", "2.8% interest"; null when there is nothing to add */
+    detail: string | null;
+    /** True when a signal is about this product (drawn with an orange border) */
+    highlight: boolean;
 }
 
-export interface TransferPreview {
-    fromAccountId: string;
-    fromAccountName: string;
-    fromIban: string;
-    toIban: string;
-    amount: Money;
-    currency: string;
-    description: string;
-    expiresAt: string;
+export interface BriefingSignal {
+    severity: SignalSeverity;
+    text: string;
+    sourceIds: string[];
 }
 
-export interface TransferResult {
-    transactionId: string;
-    toIban: string;
-    amount: Money;
-    currency: string;
-    newBalance: Money;
+export interface BriefingTimelineItem {
+    id: string;
+    when: string;
+    title: string;
+    detail: string;
 }
+
+export interface CustomerBriefing {
+    kind: 'CUSTOMER';
+    customer: BriefingCustomer;
+    nextMeeting: BriefingMeeting | null;
+    products: BriefingProduct[];
+    signals: BriefingSignal[];
+    nextBestAction: string | null;
+    timeline: BriefingTimelineItem[];
+}
+
+export interface AttentionItem {
+    customerId: string;
+    customerName: string;
+    severity: SignalSeverity;
+    reasons: BriefingSignal[];
+    meeting: BriefingMeeting | null;
+    recommendation: string;
+}
+
+export interface AttentionBriefing {
+    kind: 'ATTENTION';
+    items: AttentionItem[];
+}
+
+export type Briefing = CustomerBriefing | AttentionBriefing;
+
+// ---------- Chat ----------
 
 export interface ChatResponse {
     conversationId: string;
     reply: string;
-    action: ActionResult | null;
+    promptId: string | null;
+    source: ReplySource;
+    citedSources: string[];
+    briefing?: Briefing | null;
+    followUps?: string[];
 }
 
 export interface ChatEntry {
     id: string;
     role: 'user' | 'assistant' | 'error';
     content: string;
-    action?: ActionResult | null;
+    createdAt: string;
+    source?: ReplySource;
+    citedSources?: string[];
+    briefing?: Briefing | null;
+    followUps?: string[];
+    animate?: boolean;
 }
