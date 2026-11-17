@@ -3,19 +3,14 @@ import { login } from '../api/auth';
 import { sendMessage } from '../api/chat';
 import { ApiError } from '../api/http';
 import type { ChatEntry } from '../types';
-import { ActionCard } from './ActionCard';
 
 const SUGGESTIONS = [
-    'What is my balance?',
-    'Show my last transactions',
-    'Transfer 150 to RO49AAAA1B31007593840000',
+    'Create a dashboard for my meeting with Max Müller',
+    'Focus on technology exposure',
+    'Show the portfolio with a 10% reduction in technology',
 ];
 
-interface Props {
-    onBalanceChanged: () => void;
-}
-
-export function ChatPanel({ onBalanceChanged }: Props) {
+export function ChatPanel() {
     const [entries, setEntries] = useState<ChatEntry[]>([]);
     const [input, setInput] = useState('');
     const [sending, setSending] = useState(false);
@@ -41,7 +36,7 @@ export function ChatPanel({ onBalanceChanged }: Props) {
             setConversationId(response.conversationId);
             setEntries((previous) => [
                 ...previous,
-                { id: crypto.randomUUID(), role: 'assistant', content: response.reply, action: response.action },
+                { id: crypto.randomUUID(), role: 'assistant', content: response.reply },
             ]);
         } catch (error) {
             if (error instanceof ApiError && error.status === 401) {
@@ -67,7 +62,7 @@ export function ChatPanel({ onBalanceChanged }: Props) {
             <div className="messages">
                 {entries.length === 0 && (
                     <div className="empty-chat">
-                        <p className="muted">Ask me about your accounts. For example:</p>
+                        <p className="muted">Ask me to prepare a client dashboard. For example:</p>
                         <div className="suggestions">
                             {SUGGESTIONS.map((suggestion) => (
                                 <button key={suggestion} className="chip" onClick={() => void submit(suggestion)}>
@@ -81,7 +76,6 @@ export function ChatPanel({ onBalanceChanged }: Props) {
                 {entries.map((entry) => (
                     <div key={entry.id} className={`message ${entry.role}`}>
                         <div className="bubble">{entry.content}</div>
-                        {entry.action && <ActionCard action={entry.action} onBalanceChanged={onBalanceChanged} />}
                     </div>
                 ))}
 
